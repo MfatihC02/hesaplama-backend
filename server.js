@@ -8,8 +8,14 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// CORS ayarları - tüm originlere izin ver
+app.use(cors({
+  origin: '*',  // Tüm domainlere izin ver
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],  // Tüm HTTP metodlarına izin ver
+  allowedHeaders: '*',  // Tüm headerlara izin ver
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Routes
@@ -19,11 +25,15 @@ app.use('/api', tohumRoutes);
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('MongoDB bağlantısı başarılı');
-    // Server'ı başlat
-    app.listen(process.env.PORT, () => {
-      console.log(`Server ${process.env.PORT} portunda çalışıyor`);
-    });
   })
   .catch((error) => {
     console.log('MongoDB bağlantı hatası:', error);
   });
+
+// Sağlık kontrolü için root endpoint
+app.get('/', (req, res) => {
+  res.json({ message: 'API is running' });
+});
+
+// Vercel için export
+export default app;
